@@ -38,7 +38,7 @@
         url: "{{ wal_g_repo }}/{{ wal_g_archive }}"
         dest: /tmp/
         timeout: 60
-        validate_certs: false
+        validate_certs: true
       check_mode: false
       vars:
         wal_g_repo: "https://github.com/wal-g/wal-g/releases/download/v{{ wal_g_version | string | replace('v', '') }}"
@@ -134,7 +134,7 @@
             url: "https://go.dev/dl/go{{ go_latest_version.stdout }}.linux-{{ go_architecture_map[ansible_architecture] }}.tar.gz"
             dest: /tmp/
             timeout: 60
-            validate_certs: false
+            validate_certs: true
 
         - name: Install Go
           ansible.builtin.unarchive:
@@ -202,7 +202,7 @@
         url: "https://github.com/wal-g/wal-g/releases/download/v{{ wal_g_version | string | replace('v', '') }}/wal-g.linux-amd64.tar.gz"
         dest: /tmp/
         timeout: 60
-        validate_certs: false
+        validate_certs: true
       environment: "{{ proxy_env | default({}) }}"
       check_mode: false
 

@@ -30,7 +30,7 @@
       ansible.builtin.get_url:
         url: "{{ consul_checksum_file_url }}"
         dest: "{{ consul_temp_dir.path }}/consul_{{ consul_version }}_SHA256SUMS"
-        validate_certs: false
+        validate_certs: true
       tags: installation
       when: not consul_checksum.stat.exists | bool
 

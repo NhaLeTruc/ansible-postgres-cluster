@@ -21,7 +21,7 @@
         url: "{{ item }}"
         dest: /tmp/
         timeout: 60
-        validate_certs: false
+        validate_certs: true
       loop:
         - "{{ etcd_package_repo }}"
       environment: "{{ proxy_env | default({}) }}"

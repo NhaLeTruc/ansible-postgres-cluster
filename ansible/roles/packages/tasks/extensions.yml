@@ -261,7 +261,7 @@
         url: "{{ pgvectorscale_repo }}/{{ pgvectorscale_archive }}"
         dest: "/tmp/{{ pgvectorscale_archive }}"
         timeout: 60
-        validate_certs: false
+        validate_certs: true
       check_mode: false
 
     - name: Extract pgvectorscale package

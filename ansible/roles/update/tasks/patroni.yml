@@ -47,7 +47,7 @@
         url: "{{ item }}"
         dest: /tmp/
         timeout: 60
-        validate_certs: false
+        validate_certs: true
       loop: "{{ patroni_deb_package_repo | list }}"
       when: ansible_os_family == "Debian" and patroni_deb_package_repo | length > 0
 
@@ -69,7 +69,7 @@
         url: "{{ item }}"
         dest: /tmp/
         timeout: 60
-        validate_certs: false
+        validate_certs: true
       loop: "{{ patroni_rpm_package_repo | list }}"
       when: ansible_os_family == "RedHat" and patroni_rpm_package_repo | length > 0
 

@@ -88,7 +88,7 @@
         url: "{{ item }}"
         dest: /tmp/
         timeout: 120
-        validate_certs: false
+        validate_certs: true
       loop:
         - "{{ haproxy_src_repo }}"
         - "{{ lua_src_repo }}"
