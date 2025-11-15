@@ -17,6 +17,7 @@
       ansible.builtin.copy:
         src: requirements.txt
         dest: /tmp/requirements.txt
+        mode: "0644"
       when: patroni_pip_requirements_repo | length < 1
 
     - name: Install setuptools
@@ -118,6 +119,7 @@
       ansible.builtin.copy:
         src: "{{ item }}"
         dest: /tmp/
+        mode: "0644"
       loop: "{{ patroni_pip_requirements_file }}"
       when: patroni_pip_requirements_file | length > 0
 
@@ -125,6 +127,7 @@
       ansible.builtin.copy:
         src: "{{ item }}"
         dest: /tmp/
+        mode: "0644"
       loop: "{{ patroni_pip_package_file }}"
       when: patroni_pip_package_file | length > 0
 
@@ -231,6 +234,7 @@
       ansible.builtin.copy:
         src: "{{ patroni_deb_package_file }}"
         dest: /tmp/
+        mode: "0644"
       when: ansible_os_family == "Debian"
 
     - name: Install patroni from deb package
@@ -249,6 +253,7 @@
       ansible.builtin.copy:
         src: "{{ patroni_rpm_package_file }}"
         dest: /tmp/
+        mode: "0644"
       when: ansible_os_family == "RedHat"
 
     - name: Install patroni from rpm package
