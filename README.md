@@ -63,26 +63,34 @@ You have the option to easily deploy Postgres clusters using the Console (UI) or
 To run the autobase console, execute the following command:
 
 ```bash
+# First, generate a secure authorization token
+export PG_CONSOLE_TOKEN=$(openssl rand -base64 32)
+
 docker run -d --name autobase-console \
   --publish 80:80 \
   --publish 8080:8080 \
   --env PG_CONSOLE_API_URL=http://localhost:8080/api/v1 \
-  --env PG_CONSOLE_AUTHORIZATION_TOKEN=secret_token \
+  --env PG_CONSOLE_AUTHORIZATION_TOKEN="${PG_CONSOLE_TOKEN}" \
   --env PG_CONSOLE_DOCKER_IMAGE=autobase/automation:latest \
   --volume console_postgres:/var/lib/postgresql \
   --volume /var/run/docker.sock:/var/run/docker.sock \
   --volume /tmp/ansible:/tmp/ansible \
   --restart=unless-stopped \
   autobase/console:latest
+
+# Display the token for use in the UI
+echo "Your authorization token is: ${PG_CONSOLE_TOKEN}"
 ```
 
 > [!NOTE]
-> If you are running the console on a dedicated server (rather than on your laptop), replace `localhost` with the server’s IP address in the `PG_CONSOLE_API_URL` variable.
+> If you are running the console on a dedicated server (rather than on your laptop), replace `localhost` with the server's IP address in the `PG_CONSOLE_API_URL` variable.
 > [!TIP]
 > It is recommended to run the console in the same network as your database servers to enable monitoring of the cluster status.
+> [!IMPORTANT]
+> Save the generated authorization token in a secure location. You will need it to access the Console UI.
 
 **Open the Console UI**:
-Go to http://localhost:80 (or the address of your server) and use `secret_token` for authorization.
+Go to http://localhost:80 (or the address of your server) and use the generated authorization token for authentication.
 
 ![Cluster creation demo](images/pg_console_create_cluster_demo.gif)
 
