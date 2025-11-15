@@ -8,6 +8,24 @@
     - name: Load common default variables
       ansible.builtin.include_tasks: roles/common/tasks/load_defaults.yml
 
+    # Validate critical configuration variables
+    - name: Validate required variables are defined
+      ansible.builtin.assert:
+        that:
+          - patroni_cluster_name is defined
+          - patroni_cluster_name | length > 0
+        fail_msg: "patroni_cluster_name must be defined and not empty"
+        success_msg: "Required variables validated successfully"
+
+    - name: Validate DCS configuration
+      ansible.builtin.assert:
+        that:
+          - dcs_type is defined
+          - dcs_type in ['etcd', 'consul']
+        fail_msg: "dcs_type must be either 'etcd' or 'consul'"
+        success_msg: "DCS configuration validated"
+      when: dcs_type is defined
+
     # set_fact: 'pgbackrest_install' to configure Postgres backups (TODO: Add the ability to configure backups in the UI)
     # Note: Applicable only for "aws", "gcp", "azure", because:
     # "digitalocean" - requires the Spaces access keys ("AWS_ACCESS_KEY_ID" and "AWS_SECRET_ACCESS_KEY" variables)
