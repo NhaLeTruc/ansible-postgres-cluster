@@ -3,11 +3,11 @@
   hosts: localhost # First, run tasks on the Ansible control node itself (often localhost)
   gather_facts: true # Collect information about the control node
   any_errors_fatal: true
-  pre_tasks: 
+  pre_tasks:
   # Tasks that run *before* any roles on localhost
-    - name: Include main variables
-      ansible.builtin.include_vars: "roles/common/defaults/main.yml"
-      tags: always
+    - name: Load common default variables
+      ansible.builtin.include_tasks: roles/common/tasks/load_defaults.yml
+
     # set_fact: 'pgbackrest_install' to configure Postgres backups (TODO: Add the ability to configure backups in the UI)
     # Note: Applicable only for "aws", "gcp", "azure", because:
     # "digitalocean" - requires the Spaces access keys ("AWS_ACCESS_KEY_ID" and "AWS_SECRET_ACCESS_KEY" variables)
@@ -35,17 +35,8 @@
   environment: "{{ proxy_env | default({}) }}"
 
   pre_tasks:
-    - name: Include main variables
-      ansible.builtin.include_vars: "roles/common/defaults/main.yml"
-      tags: always
-
-    - name: Include system variables
-      ansible.builtin.include_vars: "roles/common/defaults/system.yml"
-      tags: always
-
-    - name: Include OS-specific variables
-      ansible.builtin.include_vars: "roles/common/defaults/{{ ansible_os_family }}.yml"
-      tags: always
+    - name: Load common default variables
+      ansible.builtin.include_tasks: roles/common/tasks/load_defaults.yml
 
     - name: System info
       ansible.builtin.debug:
@@ -238,17 +229,8 @@
   environment: "{{ proxy_env | default({}) }}"
 
   pre_tasks:
-    - name: Include main variables
-      ansible.builtin.include_vars: "roles/common/defaults/main.yml"
-      tags: always
-
-    - name: Include system variables
-      ansible.builtin.include_vars: "roles/common/defaults/system.yml"
-      tags: always
-
-    - name: Include OS-specific variables
-      ansible.builtin.include_vars: "roles/common/defaults/{{ ansible_os_family }}.yml"
-      tags: always
+    - name: Load common default variables
+      ansible.builtin.include_tasks: roles/common/tasks/load_defaults.yml
 
     - name: Build a firewall_ports_dynamic_var
       ansible.builtin.set_fact:
@@ -308,13 +290,8 @@
   any_errors_fatal: true
 
   pre_tasks:
-    - name: Include main variables
-      ansible.builtin.include_vars: "roles/common/defaults/main.yml"
-      tags: always
-
-    - name: Include OS-specific variables
-      ansible.builtin.include_vars: "roles/common/defaults/{{ ansible_os_family }}.yml"
-      tags: always
+    - name: Load common default variables
+      ansible.builtin.include_tasks: roles/common/tasks/load_defaults.yml
 
     # if 'cloud_provider' is 'aws', 'gcp', or 'azure'
     # set_fact: 'pgbackrest_install' to configure Postgres backups (TODO: Add the ability to configure backups in the UI)
@@ -340,17 +317,9 @@
     - ansible.builtin.import_tasks: roles/pgbouncer/handlers/main.yml
 
   pre_tasks:
-    - name: Include main variables
-      ansible.builtin.include_vars: "roles/common/defaults/main.yml"
-      tags: always
+    - name: Load common default variables
 
-    - name: Include system variables
-      ansible.builtin.include_vars: "roles/common/defaults/system.yml"
-      tags: always
-
-    - name: Include OS-specific variables
-      ansible.builtin.include_vars: "roles/common/defaults/{{ ansible_os_family }}.yml"
-      tags: always
+      ansible.builtin.include_tasks: roles/common/tasks/load_defaults.yml
 
     # if 'cloud_provider' is 'aws', 'gcp', or 'azure'
     # set_fact: 'pgbackrest_install' to configure Postgres backups (TODO: Add the ability to configure backups in the UI)
@@ -482,17 +451,9 @@
   environment: "{{ proxy_env | default({}) }}"
 
   pre_tasks:
-    - name: Include main variables
-      ansible.builtin.include_vars: "roles/common/defaults/main.yml"
-      tags: always
+    - name: Load common default variables
 
-    - name: Include system variables
-      ansible.builtin.include_vars: "roles/common/defaults/system.yml"
-      tags: always
-
-    - name: Include OS-specific variables
-      ansible.builtin.include_vars: "roles/common/defaults/{{ ansible_os_family }}.yml"
-      tags: always
+      ansible.builtin.include_tasks: roles/common/tasks/load_defaults.yml
 
   roles:
     - role: prometheus
@@ -506,17 +467,9 @@
   environment: "{{ proxy_env | default({}) }}"
 
   pre_tasks:
-    - name: Include main variables
-      ansible.builtin.include_vars: "roles/common/defaults/main.yml"
-      tags: always
+    - name: Load common default variables
 
-    - name: Include system variables
-      ansible.builtin.include_vars: "roles/common/defaults/system.yml"
-      tags: always
-
-    - name: Include OS-specific variables
-      ansible.builtin.include_vars: "roles/common/defaults/{{ ansible_os_family }}.yml"
-      tags: always
+      ansible.builtin.include_tasks: roles/common/tasks/load_defaults.yml
 
   roles:
     - role: postgres_exporter
@@ -530,17 +483,9 @@
   environment: "{{ proxy_env | default({}) }}"
 
   pre_tasks:
-    - name: Include main variables
-      ansible.builtin.include_vars: "roles/common/defaults/main.yml"
-      tags: always
+    - name: Load common default variables
 
-    - name: Include system variables
-      ansible.builtin.include_vars: "roles/common/defaults/system.yml"
-      tags: always
-
-    - name: Include OS-specific variables
-      ansible.builtin.include_vars: "roles/common/defaults/{{ ansible_os_family }}.yml"
-      tags: always
+      ansible.builtin.include_tasks: roles/common/tasks/load_defaults.yml
 
   roles:
     - role: grafana

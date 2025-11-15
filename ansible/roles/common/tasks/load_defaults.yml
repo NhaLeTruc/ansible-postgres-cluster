@@ -1,0 +1,16 @@
+---
+# This task file loads common default variables for all plays
+# Used to eliminate duplication across playbooks
+# Can be included from playbook pre_tasks or from roles
+
+- name: Include main variables
+  ansible.builtin.include_vars: "{{ playbook_dir }}/roles/common/defaults/main.yml"
+  tags: always
+
+- name: Include system variables
+  ansible.builtin.include_vars: "{{ playbook_dir }}/roles/common/defaults/system.yml"
+  tags: always
+
+- name: Include OS-specific variables
+  ansible.builtin.include_vars: "{{ playbook_dir }}/roles/common/defaults/{{ ansible_os_family }}.yml"
+  tags: always
