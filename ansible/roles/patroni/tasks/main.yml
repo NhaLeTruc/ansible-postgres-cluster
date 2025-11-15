@@ -29,6 +29,11 @@
         umask: "0022"
       environment:
         PATH: "{{ ansible_env.PATH }}:/usr/local/bin:/usr/bin"
+        # PIP_BREAK_SYSTEM_PACKAGES: Required for PEP 668 (externally managed environments)
+        # This is necessary on newer Python installations (3.11+) where pip install
+        # outside virtualenvs is restricted. While ideally we'd use a virtualenv,
+        # Patroni needs system-wide installation to integrate with systemd services.
+        # See: https://peps.python.org/pep-0668/
         PIP_BREAK_SYSTEM_PACKAGES: "1"
       when: patroni_pip_requirements_repo | length < 1
 
