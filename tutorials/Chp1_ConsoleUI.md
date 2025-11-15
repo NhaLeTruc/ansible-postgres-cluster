@@ -75,19 +75,27 @@ The code for the Autobase Console lives within the `console` directory in the pr
 You don't need to dive into the code right now to use Autobase. The easiest way to get the Console running is by using Docker. The project provides instructions, often involving a command like this (from the README):
 
 ```bash
+# Generate a secure authorization token
+export PG_CONSOLE_TOKEN=$(openssl rand -base64 32)
+
 docker run -d --name autobase-console \
   --publish 80:80 \
   --publish 8080:8080 \
   --env PG_CONSOLE_API_URL=http://localhost:8080/api/v1 \
-  --env PG_CONSOLE_AUTHORIZATION_TOKEN=secret_token \
+  --env PG_CONSOLE_AUTHORIZATION_TOKEN="${PG_CONSOLE_TOKEN}" \
   --env PG_CONSOLE_DOCKER_IMAGE=autobase/automation:latest \
   --volume console_postgres:/var/lib/postgresql \
   --volume /var/run/docker.sock:/var/run/docker.sock \
   --volume /tmp/ansible:/tmp/ansible \
   --restart=unless-stopped \
   autobase/console:latest
+
+# Display the token for use in the UI
+echo "Your authorization token is: ${PG_CONSOLE_TOKEN}"
 ```
-This `docker run` command pulls the pre-built Autobase Console image (`autobase/console:latest`) and runs it. It sets up networking (`--publish`), configures the API URL and a simple authorization token (`--env`), and mounts necessary volumes (`--volume`) for data and communication with the Docker engine and the automation engine. This single command launches both the UI and the API components, along with a small internal database the console uses to store information about your clusters.
+This `docker run` command pulls the pre-built Autobase Console image (`autobase/console:latest`) and runs it. It sets up networking (`--publish`), configures the API URL and a secure authorization token (`--env`), and mounts necessary volumes (`--volume`) for data and communication with the Docker engine and the automation engine. This single command launches both the UI and the API components, along with a small internal database the console uses to store information about your clusters.
+
+> **Security Note:** Always use a securely generated token (as shown above) rather than a hardcoded value. Save the generated token in a secure location as you'll need it to access the Console UI.
 
 Alternatively, the project provides a `docker-compose.yml` file (`console/docker-compose.yml`) which does a similar job but breaks the Console into separate services (UI, API, database, and a proxy like Caddy) for better organization.
 
