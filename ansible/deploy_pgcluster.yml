@@ -100,14 +100,6 @@
       retries: 3
       when: ansible_os_family == "Debian"
 
-    - name: Check whether dpkg locks are open
-      ansible.builtin.command: lsof /var/lib/dpkg/lock
-      register: dpkg_lock_result
-      until: dpkg_lock_result.stdout == ""
-      ignore_errors: true
-      delay: 5
-      retries: 3
-
     - name: Make sure the gnupg and apt-transport-https packages are present
       ansible.builtin.apt:
         pkg:

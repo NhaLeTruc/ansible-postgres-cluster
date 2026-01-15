@@ -1,8 +1,10 @@
 # Infrastructures buid then test with mostly Terraform and Ansible
 
-## Requirements
+## Ansible version
 
 Minimum supported Ansible version: 9.0.0 (ansible-core 2.16.0)
+
+## Requirements
 
 This playbook requires root privileges or sudo.
 Ansible ([What is Ansible](https://www.ansible.com/how-ansible-works/)?)
@@ -52,17 +54,9 @@ To minimize the risk of losing data on autofailover, you can configure settings 
 - synchronous_mode_strict: 'true'
 - synchronous_commit: 'on' (or 'remote_apply')
 
-## Getting Started with Homelab
+## Optional Key generation
 
-Tested on 24th April 2025 Proxmox server.
-
-## Install requirements
-
-```bash
-ansible-galaxy install -r requirements.yml
-```
-
-Optionally generate a self-signed certificate, private key for TLS encryption of Vault in /certs/ directory:
+Generate A self-signed certificate, private key for TLS encryption of Vault in /certs/ directory:
 
 ```bash
 openssl req -newkey rsa:2048 -keyout ansible_key.pem -out ansible.csr
@@ -72,7 +66,95 @@ openssl x509 -signkey ansible_key.pem -in ansible.csr -req -days 365 -out ansibl
 chmod 600 ansible_key.pem ansible.crt ansible.csr
 ```
 
-## Create VM manually on PROXMOX shell
+## Getting Started
+
+1. [Install Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html) on one control node (which could easily be a laptop)
+
+```bash
+sudo apt update && sudo apt install -y python3-pip sshpass git
+pip3 install ansible
+```
+
+2. Download or clone this repository
+
+```bash
+git clone https://github.com/NhaLeTruc/ansible-postgres-cluster
+```
+
+2. Go to the ansible directory
+
+```bash
+cd ansible-postgres-cluster/ansible
+```
+
+3. Install requirements on the control node
+
+```bash
+ansible-galaxy install --force -r requirements.yml
+```
+
+Note: If you plan to use Consul (`dcs_type: consul`), install the consul role requirements
+
+```bash
+ansible-galaxy install -r roles/consul/requirements.yml
+```
+
+4. Edit the inventory file
+
+Specify (non-public) IP addresses and connection settings for your environment
+
+```bash
+nano inventory
+```
+
+5. Try to connect to hosts
+
+```bash
+ansible all -m ping -u debian
+```
+
+6. Run playbook:
+
+```bash
+ansible-playbook -e @secret.enc deploy_pgcluster.yml
+```
+
+>`secret.enc` contain ansible vault credentials
+
+This playbook will take quite sometimes. It will also log into your console information regards the deployment. Toward the end their will be information on how to connect to your cluster so pay attention.
+
+- **Fix for dpkg issue**
+
+If error is dpkg can't be updated, try this:
+
+```bash
+ssh debian@192.168.1.XX
+
+lsof /var/lib/dpkg/updates/
+
+sudo rm -rf /var/lib/dpkg/updates/* && sudo dpkg --configure -a
+```
+
+### How to start from scratch
+
+If you need to start from the very beginning, you can use the playbook `remove_cluster.yml`.
+Available variables:
+
+- `remove_postgres`: stop the PostgreSQL service and remove data.
+- `remove_etcd`: stop the ETCD service and remove data.
+- `remove_consul`: stop the Consul service and remove data.
+Run the following command to remove specific components:
+
+```bash
+ansible-playbook remove_cluster.yml -e "remove_postgres=true remove_etcd=true"
+```
+
+This command will delete the specified components, allowing you to start a new installation from scratch.
+:warning: **Caution:** be careful when running this command in a production environment.
+
+## Troubleshooting with Promox VMs
+
+### Create VM manually on PROXMOX shell
 
 ```bash
 
@@ -103,33 +185,7 @@ qm template 902
 
 ```
 
-## Filling in variables for packers and terraform
-
-Run **/bin/generate-vars** after installing **python-hcl2**. This would create variable files in designated directories. Make sure to add them into *.gitignore*.
-
-Packer will ssh into the VM above clone and do effectively these tasks
-
-```bash
-
-# Configure Cloud-Init/IP Config & User/Password
-# Login and install qemu-guest-agent
-
-sudo apt update && apt -y install qemu-guest-agent
-
-systemctl enable qemu-guest-agent
-systemctl start qemu-guest-agent
-
-systemctl status qemu-guest-agent
-
-```
-
-## Run Packer to build base image
-
-Proxmox couldn't create golden image template yet at the moment. So Packer will clone the manually created template then configurate it instead.
-
-Crucially **qemu-guest-agent** will be installed into the golden image template. This allow terraform to utilize it in create the cluster's nodes.
-
-## Check Proxmox VM config info
+### Check Proxmox VM config info
 
 ```bash
 pvesh get /nodes/pve/qemu/$VMID/config --output-format json-pretty
@@ -139,13 +195,7 @@ terraform providers
 terraform -upgrade
 ```
 
-## Packer have been moved to separated repository
-
-Terraform is responsible for creating the vm needed for the cluster.
-
-Ansible handles the heavy lifting of setting up and configurating Postgres HA cluster.
-
-## Terraform IaC
+### Terraform IaC
 
 Packer template has ssh key installed in them. Specifies ssh access in terraform code created issue of ssh acess sometimes.
 
@@ -162,14 +212,26 @@ clone {
 
 Clone `full = true` is very important. Keep this option on.
 
-## Add files for ansible-core 2.14.18 to work instead of 2.16+
+- **Create, destroy, and list out required VMs**
+
+```bash
+cd terraform/cluster
+
+terraform apply
+
+terraform destroy
+
+terraform show
+```
+
+### Add files for ansible-core 2.14.18 to work instead of 2.16+
 
 Some code needed to be added into project for ansible to work.
 
 + `.\ansible\module_utils\common\file.py`
 + `.\ansible\module_utils\urls.py`
 
-## proxmox command stop/start multiple vms
+### proxmox command stop/start multiple vms
 
 ```bash
 # First time only
@@ -188,7 +250,7 @@ cat vm_list.txt | parallel -j 11 qm start {}
 cat vm_list.txt | parallel -j 11 qm destroy {}
 ```
 
-## Resize Proxmox VM disk size
+### Resize Proxmox VM disk size
 
 To increase the size of a virtual machine's disk in Proxmox, you need to resize the disk within the Proxmox GUI and then expand the partition and filesystem inside the guest operating system. First, shut down the VM and resize the disk using the Proxmox web interface, then start the VM and use tools within the guest OS to expand the partition and filesystem to utilize the newly allocated space.
 
